@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Millennium Scale">
+  <defs>
+    <!-- userSpaceOnUse is required: the beam and column are zero-area paths,
+         so an objectBoundingBox gradient would be degenerate and paint nothing. -->
+    <linearGradient id="msGold" gradientUnits="userSpaceOnUse" x1="32" y1="6" x2="32" y2="56">
+      <stop offset="0" stop-color="#F0D278"/>
+      <stop offset="0.5" stop-color="#D8AE33"/>
+      <stop offset="1" stop-color="#A67C1B"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#msGold)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M32 24V50"/>
+    <path d="M21 52h22"/>
+    <path d="M11 22h42"/>
+    <path d="M11 22l-6 9M11 22l6 9M53 22l-6 9M53 22l6 9"/>
+  </g>
+  <path d="M4 31h14a7 7 0 0 1-14 0Z" fill="url(#msGold)"/>
+  <path d="M46 31h14a7 7 0 0 1-14 0Z" fill="url(#msGold)"/>
+  <path d="M32 10c7 0 11 5 11 7s-4 7-11 7-11-5-11-7 4-7 11-7Z" fill="url(#msGold)"/>
+  <circle cx="32" cy="17" r="3.4" fill="#12121A"/>
+  <circle cx="33.1" cy="15.8" r="1.1" fill="#F0D278"/>
+</svg>
