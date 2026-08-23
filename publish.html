@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Publish a banlist — Millennium Scale</title>
+<meta name="description" content="Upload a .conf or JSON banlist, check it card by card, and publish it into the archive.">
+<rect width="64" height="64" rx="12" fill="%2312121A"/><g fill="none" stroke="%23D8AE33" stroke-width="3.4" stroke-linecap="round"><path d="M32 24v22"/><path d="M22 48h20"/><path d="M13 24h38"/><path d="M13 24l-5 8M13 24l5 8M51 24l-5 8M51 24l5 8"/></g><path d="M7 32h12a6 6 0 0 1-12 0Z" fill="%23D8AE33"/><path d="M45 32h12a6 6 0 0 1-12 0Z" fill="%23D8AE33"/><path d="M32 12c6 0 10 4.5 10 6.2S38 24.5 32 24.5 22 20 22 18.2 26 12 32 12Z" fill="%23E8C45A"/><circle cx="32" cy="18.2" r="3" fill="%2312121A"/></svg>">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#EFEAE0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#12121A" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://scale.reizu.dev/publish.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Millennium Scale">
+<meta property="og:title" content="Publish a banlist — Millennium Scale">
+<meta property="og:description" content="Upload a .conf or JSON banlist, check it card by card, and publish it into the archive.">
+<meta property="og:url" content="https://scale.reizu.dev/publish.html">
+<meta property="og:image" content="https://scale.reizu.dev/assets/icons/og-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Publish a banlist — Millennium Scale">
+<meta name="twitter:description" content="Upload a .conf or JSON banlist, check it card by card, and publish it into the archive.">
+<meta name="twitter:image" content="https://scale.reizu.dev/assets/icons/og-card.png">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  // Applied before first paint so the theme never flashes, and read the same
+  // way MS.prefs writes it so it survives navigation between pages.
+  (function(){try{
+    var raw=localStorage.getItem('ms.theme'),t=null;
+    if(raw){try{t=JSON.parse(raw);}catch(e){t=raw;}}
+    if(t!=='dark'&&t!=='light'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}
+    document.documentElement.setAttribute('data-theme',t);
+  }catch(e){}})();
+</script>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <svg viewBox="0 0 64 64" width="30" height="30" aria-hidden="true"><defs><linearGradient id="msGold" gradientUnits="userSpaceOnUse" x1="32" y1="6" x2="32" y2="56"><stop offset="0" stop-color="#F0D278"/><stop offset=".5" stop-color="#D8AE33"/><stop offset="1" stop-color="#A67C1B"/></linearGradient></defs><g fill="none" stroke="url(#msGold)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M32 24V50"/><path d="M21 52h22"/><path d="M11 22h42"/><path d="M11 22l-6 9M11 22l6 9M53 22l-6 9M53 22l6 9"/></g><path d="M4 31h14a7 7 0 0 1-14 0Z" fill="url(#msGold)"/><path d="M46 31h14a7 7 0 0 1-14 0Z" fill="url(#msGold)"/><path d="M32 10c7 0 11 5 11 7s-4 7-11 7-11-5-11-7 4-7 11-7Z" fill="url(#msGold)"/><circle cx="32" cy="17" r="3.4" fill="#12121A"/><circle cx="33.1" cy="15.8" r="1.1" fill="#F0D278"/></svg>
+      <span class="brand-name">Millennium <em>Scale</em></span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="index.html">Validate</a>
+      <a href="lists.html">Lists</a>
+      <a href="publish.html">Publish</a>
+    </nav>
+    <button class="theme-toggle" type="button" aria-label="Switch to dark mode">
+      <span class="knob">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="#17140B" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 1.6v2.4M12 20v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M1.6 12h2.4M20 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="#17140B"><path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1Z"/></svg>
+      </span>
+    </button>
+  </div>
+</header>
+
+<main class="page">
+  <div class="wrap">
+
+    <div class="page-head">
+      <p class="eyebrow">Keep the archive current</p>
+      <h1>Add a list.</h1>
+      <p class="lede">Drop in a <code>.conf</code> from ygo.anihelp.co.uk (or anywhere else), or a JSON list in this site's own format. Every passcode gets checked against the card database before anything is saved.</p>
+    </div>
+
+    <div class="publish-grid">
+
+      <div class="stack">
+        <section class="dropzone" id="dropzone">
+          <h2>Drop a banlist file</h2>
+          <p><code>.conf</code>, <code>.lflist.conf</code> or <code>.json</code>. Combined files with several <code>!list</code> sections are fine — you'll pick which one to import.</p>
+          <div class="dz-actions">
+            <button class="btn btn-primary" type="button" id="pick">Choose a file</button>
+          </div>
+          <input type="file" id="file" accept=".conf,.json,.txt,.lflist" hidden>
+          <p class="or">or paste it</p>
+          <div class="paste-area">
+            <textarea id="paste" rows="6" spellcheck="false" placeholder="!2026.05 TCG&#10;23434538 1 --Maxx &quot;C&quot;&#10;55144522 0 --Pot of Greed"></textarea>
+            <div class="dz-actions" style="margin-top:10px;justify-content:flex-start">
+              <button class="btn" type="button" id="read">Read banlist</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel pad stack" id="meta" hidden>
+          <h2>Details</h2>
+          <div class="field">
+            <label for="m-section">Section in the file</label>
+            <select id="m-section"></select>
+          </div>
+          <div class="field">
+            <label for="m-format">Format</label>
+            <select id="m-format">
+              <option value="TCG">TCG</option>
+              <option value="OCG">OCG</option>
+              <option value="MD">Master Duel</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="m-date">Effective date</label>
+            <input type="text" id="m-date" placeholder="YYYY-MM-DD" spellcheck="false">
+          </div>
+          <div class="field">
+            <label for="m-source">Source URL (optional)</label>
+            <input type="text" id="m-source" placeholder="https://ygo.anihelp.co.uk/..." spellcheck="false">
+          </div>
+        </section>
+      </div>
+
+      <div class="stack">
+        <section class="panel pad" id="checks-panel" hidden>
+          <h2 style="margin-bottom:10px">Checks</h2>
+          <div id="checks"></div>
+          <div class="dz-actions" style="margin-top:16px;justify-content:flex-start">
+            <button class="btn btn-primary" type="button" id="publish" disabled>Publish to this browser</button>
+            <button class="btn" type="button" id="export-json" disabled>Download JSON</button>
+          </div>
+          <p class="note" style="margin-top:14px">Publishing saves the list in this browser only, so you can check decks against it right away. To ship it to everyone, download the bundle below and commit it as <strong>data/banlists.js</strong>.</p>
+        </section>
+
+        <section class="panel pad" id="preview-panel" hidden>
+          <h2 style="margin-bottom:10px">Preview</h2>
+          <div id="preview"></div>
+        </section>
+
+        <section class="panel pad">
+          <h2 style="margin-bottom:10px">Lists saved in this browser</h2>
+          <div id="local"></div>
+          <div class="dz-actions" style="margin-top:14px;justify-content:flex-start">
+            <button class="btn" type="button" id="export-bundle">Download data/banlists.js</button>
+            <button class="btn btn-ghost" type="button" id="export-all-json">Download banlists.json</button>
+          </div>
+        </section>
+      </div>
+
+    </div>
+
+    <div class="crosslink">
+      <span>Once it's in:</span>
+      <a href="lists.html">See it in the archive &rarr;</a>
+      <span aria-hidden="true">·</span>
+      <a href="index.html">Check a deck against it &rarr;</a>
+    </div>
+
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>Millennium Scale &copy; <span id="year"></span></span>
+    <span>Banlist data from <a href="https://ygo.anihelp.co.uk/" rel="noopener">ygo.anihelp.co.uk</a></span>
+    <span>Card data from <a href="https://ygoprodeck.com/" rel="noopener">YGOPRODeck</a></span>
+    <span>Not affiliated with Konami.</span>
+  </div>
+</footer>
+
+<script src="data/banlists.js"></script>
+<script src="data/idmap.js"></script>
+<script src="js/core.js"></script>
+<script src="js/publish.js"></script>
+
+<!-- If the stylesheet or scripts didn't load, say so plainly instead of
+     rendering a broken page. Styles are inline here on purpose. -->
+<script>
+(function () {
+  function check() {
+    var head = document.querySelector('.masthead');
+    var cssOk = head && getComputedStyle(head).position === 'sticky';
+    var jsOk = !!window.MS;
+    if (cssOk && jsOk) return;
+    var missing = [];
+    if (!cssOk) missing.push('assets/styles.css');
+    if (!jsOk) missing.push('js/core.js');
+    if (!window.MS_BANLISTS) missing.push('data/banlists.js');
+    var bar = document.createElement('div');
+    bar.setAttribute('style',
+      'position:fixed;left:0;right:0;top:0;z-index:9999;background:#7A1420;color:#fff;' +
+      'font:14px/1.5 system-ui,sans-serif;padding:14px 18px;box-shadow:0 2px 12px rgba(0,0,0,.4)');
+    bar.innerHTML =
+      '<strong>These files didn\u2019t load: ' + missing.join(', ') + '</strong><br>' +
+      'Millennium Scale needs its folder structure intact \u2014 <code>assets/</code>, ' +
+      '<code>js/</code> and <code>data/</code> must sit next to this HTML file. ' +
+      'If you downloaded the files individually they will have been flattened into one folder; ' +
+      'unzip the project archive instead.';
+    document.body.insertBefore(bar, document.body.firstChild);
+    document.body.style.paddingTop = '84px';
+  }
+  if (document.readyState === 'complete') setTimeout(check, 50);
+  else window.addEventListener('load', function () { setTimeout(check, 50); });
+})();
+</script>
+</body>
+</html>

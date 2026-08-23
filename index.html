@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Millennium Scale — weigh your deck against the list</title>
+<meta name="description" content="Drop in a .ydk, ydke:// URI or deck JSON and see exactly which cards break the TCG, OCG or Master Duel Forbidden &amp; Limited list.">
+<rect width="64" height="64" rx="12" fill="%2312121A"/><g fill="none" stroke="%23D8AE33" stroke-width="3.4" stroke-linecap="round"><path d="M32 24v22"/><path d="M22 48h20"/><path d="M13 24h38"/><path d="M13 24l-5 8M13 24l5 8M51 24l-5 8M51 24l5 8"/></g><path d="M7 32h12a6 6 0 0 1-12 0Z" fill="%23D8AE33"/><path d="M45 32h12a6 6 0 0 1-12 0Z" fill="%23D8AE33"/><path d="M32 12c6 0 10 4.5 10 6.2S38 24.5 32 24.5 22 20 22 18.2 26 12 32 12Z" fill="%23E8C45A"/><circle cx="32" cy="18.2" r="3" fill="%2312121A"/></svg>">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#EFEAE0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#12121A" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://scale.reizu.dev/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Millennium Scale">
+<meta property="og:title" content="Millennium Scale — Yu-Gi-Oh! banlist validator">
+<meta property="og:description" content="Drop in a .ydk, ydke:// URI or deck JSON and see exactly which cards break the TCG, OCG or Master Duel Forbidden &amp; Limited list.">
+<meta property="og:url" content="https://scale.reizu.dev/">
+<meta property="og:image" content="https://scale.reizu.dev/assets/icons/og-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Millennium Scale — Yu-Gi-Oh! banlist validator">
+<meta name="twitter:description" content="Drop in a .ydk, ydke:// URI or deck JSON and see exactly which cards break the TCG, OCG or Master Duel Forbidden &amp; Limited list.">
+<meta name="twitter:image" content="https://scale.reizu.dev/assets/icons/og-card.png">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  // Set the theme before first paint so there is no flash.
+  (function(){try{var t=JSON.parse(localStorage.getItem('ms.theme'))||localStorage.getItem('ms.theme');
+  if(t!=='dark'&&t!=='light'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}
+  document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+</script>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <svg viewBox="0 0 64 64" width="30" height="30" aria-hidden="true"><defs><linearGradient id="msGold" gradientUnits="userSpaceOnUse" x1="32" y1="6" x2="32" y2="56"><stop offset="0" stop-color="#F0D278"/><stop offset=".5" stop-color="#D8AE33"/><stop offset="1" stop-color="#A67C1B"/></linearGradient></defs><g fill="none" stroke="url(#msGold)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M32 24V50"/><path d="M21 52h22"/><path d="M11 22h42"/><path d="M11 22l-6 9M11 22l6 9M53 22l-6 9M53 22l6 9"/></g><path d="M4 31h14a7 7 0 0 1-14 0Z" fill="url(#msGold)"/><path d="M46 31h14a7 7 0 0 1-14 0Z" fill="url(#msGold)"/><path d="M32 10c7 0 11 5 11 7s-4 7-11 7-11-5-11-7 4-7 11-7Z" fill="url(#msGold)"/><circle cx="32" cy="17" r="3.4" fill="#12121A"/><circle cx="33.1" cy="15.8" r="1.1" fill="#F0D278"/></svg>
+      <span class="brand-name">Millennium <em>Scale</em></span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="index.html">Validate</a>
+      <a href="lists.html">Lists</a>
+      <a href="publish.html">Publish</a>
+    </nav>
+    <button class="theme-toggle" type="button" aria-label="Switch to dark mode">
+      <span class="knob">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="#17140B" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 1.6v2.4M12 20v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M1.6 12h2.4M20 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="#17140B"><path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1Z"/></svg>
+      </span>
+    </button>
+  </div>
+</header>
+
+<main class="page">
+  <div class="wrap">
+
+    <div class="page-head">
+      <p class="eyebrow">Forbidden &amp; Limited check</p>
+      <h1>Weigh your deck against the list.</h1>
+      <p class="lede">Drop in a <code>.ydk</code>, paste a <code>ydke://</code> URI, or hand it deck JSON. Every card that breaks the list turns red, with the exact reason and how many copies to cut.</p>
+    </div>
+
+    <div class="panel toolbar" role="group" aria-label="List selection">
+      <div class="field">
+        <label for="fmt">Format</label>
+        <select id="fmt"></select>
+      </div>
+      <div class="field">
+        <label for="lst">Effective list</label>
+        <select id="lst"></select>
+      </div>
+      <div class="field" id="mode-field">
+        <span class="lbl">Ruleset</span>
+        <div class="segmented" id="mode-seg">
+          <button type="button" data-mode="advanced" aria-pressed="true">Advanced</button>
+          <button type="button" data-mode="traditional" aria-pressed="false">Traditional</button>
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <div class="field" style="flex:0 0 auto">
+        <span class="lbl">View</span>
+        <div class="segmented" id="art-seg">
+          <button type="button" data-art="text" aria-pressed="true">Details</button>
+          <button type="button" data-art="image" aria-pressed="false">Card art</button>
+        </div>
+      </div>
+    </div>
+
+    <section class="dropzone" id="dropzone" style="margin-top:22px">
+      <h2>Drop a decklist</h2>
+      <p>A <code>.ydk</code> or <code>.json</code> file, straight from EDOPro, YGO Omega, Master Duel Meta, or your own converter.</p>
+      <div class="dz-actions">
+        <button class="btn btn-primary" type="button" id="pick">Choose a file</button>
+        <button class="btn" type="button" id="sample">Load a sample deck</button>
+      </div>
+      <input type="file" id="file" accept=".ydk,.json,.txt,application/json,text/plain" hidden>
+      <p class="or">or paste it here</p>
+      <div class="paste-area">
+        <textarea id="paste" rows="4" spellcheck="false" placeholder="ydke://o6dfBaOnXwWjp18F...  —  or paste the contents of a .ydk / deck JSON"></textarea>
+        <div class="dz-actions" style="margin-top:10px; justify-content:flex-start">
+          <button class="btn" type="button" id="read">Read decklist</button>
+          <button class="btn btn-ghost" type="button" id="clear">Clear</button>
+        </div>
+      </div>
+    </section>
+
+    <div id="status" aria-live="polite"></div>
+    <div id="result"></div>
+
+    <div class="crosslink">
+      <span>Need a different list?</span>
+      <a href="lists.html">Browse every banlist &rarr;</a>
+      <span aria-hidden="true">·</span>
+      <a href="publish.html">Add one that's missing &rarr;</a>
+    </div>
+
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>Millennium Scale &copy; <span id="year"></span></span>
+    <span>Banlist data from <a href="https://ygo.anihelp.co.uk/" rel="noopener">ygo.anihelp.co.uk</a></span>
+    <span>Card data from <a href="https://ygoprodeck.com/" rel="noopener">YGOPRODeck</a></span>
+    <span>Not affiliated with Konami.</span>
+  </div>
+</footer>
+
+<script src="data/banlists.js"></script>
+<script src="data/idmap.js"></script>
+<script src="js/core.js"></script>
+<script src="js/validator.js"></script>
+
+<!-- If the stylesheet or scripts didn't load, say so plainly instead of
+     rendering a broken page. Styles are inline here on purpose. -->
+<script>
+(function () {
+  function check() {
+    var head = document.querySelector('.masthead');
+    var cssOk = head && getComputedStyle(head).position === 'sticky';
+    var jsOk = !!window.MS;
+    if (cssOk && jsOk) return;
+    var missing = [];
+    if (!cssOk) missing.push('assets/styles.css');
+    if (!jsOk) missing.push('js/core.js');
+    if (!window.MS_BANLISTS) missing.push('data/banlists.js');
+    var bar = document.createElement('div');
+    bar.setAttribute('style',
+      'position:fixed;left:0;right:0;top:0;z-index:9999;background:#7A1420;color:#fff;' +
+      'font:14px/1.5 system-ui,sans-serif;padding:14px 18px;box-shadow:0 2px 12px rgba(0,0,0,.4)');
+    bar.innerHTML =
+      '<strong>These files didn\u2019t load: ' + missing.join(', ') + '</strong><br>' +
+      'Millennium Scale needs its folder structure intact \u2014 <code>assets/</code>, ' +
+      '<code>js/</code> and <code>data/</code> must sit next to this HTML file. ' +
+      'If you downloaded the files individually they will have been flattened into one folder; ' +
+      'unzip the project archive instead.';
+    document.body.insertBefore(bar, document.body.firstChild);
+    document.body.style.paddingTop = '84px';
+  }
+  if (document.readyState === 'complete') setTimeout(check, 50);
+  else window.addEventListener('load', function () { setTimeout(check, 50); });
+})();
+</script>
+</body>
+</html>

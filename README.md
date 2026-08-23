@@ -1,0 +1,264 @@
+# Millennium Scale
+
+A Yu-Gi-Oh! banlist validator. Feed it a decklist, pick a format and an effective date, and every card that breaks the Forbidden & Limited list turns red with the exact reason and how many copies to cut.
+
+Three pages, cross-linked in both directions:
+
+| Page | What it does |
+|---|---|
+| `index.html` | **Validate** — drop a `.ydk`, a `ydke://` URI, or deck JSON |
+| `lists.html` | **Lists** — browse every banlist by format and effective date |
+| `publish.html` | **Publish** — upload a new list, check it, add it to the archive |
+
+No build step, no framework, no bundler. Plain HTML, CSS and classic `<script>` tags.
+
+---
+
+## The data
+
+`data/banlists.js` ships **populated**: 211 lists, 32,437 entries.
+
+| Format | Lists | Range |
+|---|---|---|
+| TCG | 79 | May 1st 2002 → May 18th 2026 |
+| Master Duel | 51 | Aug 31st 2022 → Jul 1st 2026 |
+| OCG | 81 | Feb 2000 → Jul 1st 2026 |
+
+Refresh it whenever a new list drops:
+
+```bash
+node tools/fetch-banlists.mjs                      # from the live archive
+node tools/fetch-banlists.mjs --from ~/Downloads   # from *CombiList.conf files on disk
+node tools/fetch-banlists.mjs --only MD            # one format
+node tools/fetch-banlists.mjs --cards              # also bundle card details, for full offline use
+```
+
+Each format publishes a combined `*CombiList.conf` holding every list it has ever had, so the live mode is one request per format. Nothing is fetched at page load — the site never re-downloads the archive on its own.
+
+**Quirks the fetcher handles.** Section names are day-first European dates (`TCG 18.05.2026` → `2026-05-18`), and older OCG lists give only a month (`OCG 08.2000` → `2000-08-01`, or the exact advertised day when the index page has one). Occasionally the archive carries two sections for one date where the later is a correction — the more complete one wins, and it says so. Three sections upstream currently have no card entries at all (`MD 31.01.2026`, `MD 21.01.2026`, `OCG 21.12.2025`); those are skipped and reported rather than imported as empty lists that would call every deck legal.
+
+## Running it
+
+**Locally, no server.** Unzip the project, keep the folder structure intact, and double-click `index.html`. The data bundle is a `<script>` rather than a `fetch()` precisely so this works under `file://`.
+
+The `assets/`, `js/` and `data/` folders must sit next to the HTML files. If they don't, every page shows a red banner naming exactly which files failed to load rather than rendering unstyled.
+
+**Locally, with a server** (nicer URLs, service-worker-friendly):
+
+```bash
+python3 -m http.server 8080
+# or: npx serve .
+```
+
+**Hosted.** It's static — drop the folder on GitHub Pages, Netlify, Cloudflare Pages, S3, anything. No configuration, no environment variables, no backend.
+
+## Card details
+
+Level, Rank, Link rating, ATK/DEF, Attribute, Type, Pendulum Scale, frame type and card text all come from the [YGOPRODeck](https://ygoprodeck.com/) API, looked up by passcode and cached permanently in IndexedDB. Card data never changes once printed, so a card is fetched at most once per browser.
+
+Alt-art passcodes are folded onto the base card. This matters more than it sounds: a banlist entry and a decklist entry routinely use different printings of the same card, and comparing raw passcodes would miss the match.
+
+For a build that never touches the network at all, run the fetcher with `--cards` and add this line before `js/core.js` in each page:
+
+```html
+<script src="data/cards.js"></script>
+```
+
+## Deck input formats
+
+Passcodes are always shown as 8 characters, zero-padded — `00440556`, not `440556`. The unpadded number is what the API, the image CDN and `.conf` files use, so padding is applied only where a passcode is shown to a person; search accepts either form.
+
+**`.ydk`** — the EDOPro / YGOPro format, `#main` / `#extra` / `!side` with one passcode per line.
+
+**`ydke://`** — base64 little-endian `uint32` arrays, three `!`-separated sections.
+
+**JSON** — the parser is deliberately permissive and accepts all of these:
+
+```jsonc
+// the converter's shape — Monsters/Spells/Traps are all Main Deck
+{ "Name": "Floo",
+  "Monsters": [{ "CardDatabaseId": 20207, "Quantity": 3 }],
+  "Spells": [], "Traps": [], "Extra": [], "Side": [] }
+
+{ "main": [{ "id": 23434538, "count": 3 }], "extra": [], "side": [] }
+{ "main": [23434538, 23434538], "extra": [], "side": [] }
+{ "cards": [{ "id": 23434538, "qty": 3, "section": "main" }] }
+{ "deck": { "main": [...], "extra": [...], "side": [...] } }
+[23434538, 23434538, 23434538]
+```
+
+Section keys are matched case- and punctuation-insensitively: `Monsters`, `Spells`, `Traps` and `Ritual` all mean Main Deck; `Extra`, `ExtraDeck`, `Fusion`, `Synchro`, `Xyz` and `Link` mean Extra Deck; `Side` and `SideDeck` mean Side Deck. For each entry, `id` also matches `CardDatabaseId` / `cardId` / `passcode` / `password` / `konamiId`, and `count` also matches `Quantity` / `qty` / `amount`. Cards given by name instead of an id are resolved against the card database. When a card doesn't say which pile it's in, it's placed by frame type — Fusion, Synchro, Xyz and Link go to the Extra Deck.
+
+### Non-passcode card ids
+
+Some exporters identify cards by something other than the 8-digit passcode. Real passcodes are overwhelmingly six digits or more, so a deck full of four- and five-digit ids is detected automatically and marked as a foreign id space rather than being reported as 72 unknown cards.
+
+Translating them needs a lookup table in `data/idmap.js`. Build one from Konami's own database ids:
+
+```bash
+node tools/fetch-banlists.mjs --idmap
+```
+
+The validator then says exactly how it went — *"Translated 72 of 72 cards"* — and names any id it couldn't place. If none of them match, it says that too, rather than pretending: that means the ids belong to a different numbering scheme, and the table needs to come from whichever tool exported the deck. The file only needs to be `{ foreignId: passcode }`; swap in your own if Konami ids aren't the right space.
+
+With a map loaded, the validator also offers a **Converter JSON** export that maps back the other way, so decks round-trip.
+
+Exports are available for all three formats from the validator.
+
+## Banlist format
+
+`.conf` files are read in the standard EDOPro LFList format:
+
+```
+!2026.05 TCG
+#forbidden
+23434538 0 --Maxx "C"
+#limited
+24224830 1 --Called by the Grave
+```
+
+Status codes are `0` Forbidden, `1` Limited, `2` Semi-Limited, `3` Unlimited. A `$whitelist` line means anything *not* listed is banned. Combined files with several `!` sections are supported — the Publish page lets you pick which one to import.
+
+The JSON shape is documented at the top of `data/banlists.js`.
+
+## Comparing lists
+
+The archive page has a **Compare with** picker. It defaults to the list immediately before the one you're viewing, but you can point it at any other date in the format — including one 24 years earlier — or turn comparison off.
+
+The summary strip counts what moved: newly listed, tightened, loosened, off the list, unchanged. **Each of those is a toggle** — click one to show only those cards, click more to combine them, click again to switch it off. A *Show all* button appears once anything is selected, and categories with nothing in them are disabled rather than hidden so the counts stay readable. The Status dropdown filters independently and the two intersect, so *Tightened* plus *Forbidden only* gives exactly the cards that were newly banned.
+
+Each changed row carries a `Semi 2 → Lim 1` arrow, and **Diff CSV** exports the whole comparison.
+
+A card missing from a list is Unlimited on it, so "came off the list" and "went to Unlimited" are treated as the same event. Lower status numbers are stricter, so a falling number is a tightening.
+
+**Unreleased vs Unlimited.** A card absent from an old list because it hadn't been printed yet is a different thing from one that was legal at three copies, so those show as `Unrel` rather than `Unlim`, and the change reads *"New card, Forbidden on release"*. This matters most over long spans: diffing 2002 against 2026 turns 218 misleading `Unlim → Forb` rows into accurate ones. The comparison uses the release dates for the region you're browsing, and when a card has no release data at all it falls back to Unlimited rather than guessing.
+
+Because the diff works on any two lists, it also compares *across* formats — point a TCG list at a Master Duel one to see where the two disagree.
+
+### Release dates
+
+The **Released** column shows when each card first became legal, taken from YGOPRODeck's TCG and OCG release dates. It follows the format you're browsing: OCG lists show OCG dates, everything else shows TCG dates and falls back to OCG for cards never printed in the TCG. Master Duel has no separate release data, so those lists show TCG dates.
+
+
+## Deploying to GitHub Pages
+
+The repo is ready to publish at **https://scale.reizu.dev**. Three steps:
+
+**1. Push it.**
+
+```bash
+git init
+git add .
+git commit -m "Millennium Scale"
+git branch -M main
+git remote add origin git@github.com:<you>/millennium-scale.git
+git push -u origin main
+```
+
+**2. Turn Pages on.** Repo → *Settings* → *Pages* → **Source: GitHub Actions**. Don't pick "Deploy from a branch" — the workflow in `.github/workflows/deploy.yml` handles it.
+
+**3. Set the custom domain.** Same settings page, *Custom domain* → `scale.reizu.dev` → Save, then tick **Enforce HTTPS** once the certificate is issued (usually a few minutes, occasionally up to an hour).
+
+Your `CNAME` record at the registrar should point at `<you>.github.io`. The `CNAME` file in this repo already contains `scale.reizu.dev`; GitHub reads it on each deploy, so the domain setting won't get wiped.
+
+Every push to `main` runs the tests, assembles the site, checks that no page references a missing file, and publishes. A failing test blocks the deploy.
+
+### What gets published
+
+`index.html`, `lists.html`, `publish.html`, `404.html`, plus `assets/`, `js/`, `data/`, the icons, `site.webmanifest`, `robots.txt` and `sitemap.xml`. `tools/`, `tests/`, `README.md` and `package.json` stay in the repo but aren't served.
+
+`.nojekyll` is included so Pages serves the files as-is rather than running them through Jekyll.
+
+### Checks that run before publishing
+
+`npm test` — 56 tests across 5 suites covering the parsers, validation engine, list diff, bundled archive and deck import.
+
+`node tools/check-links.mjs _site` — walks every built page and confirms each local `href`/`src` resolves, that each page links a stylesheet, and that the data bundle isn't empty. This is the check that would have caught the flattened `assets/` folder, and it fails the build rather than shipping a broken page.
+
+Run both locally any time:
+
+```bash
+npm test
+npm run check
+```
+
+### Serving it locally
+
+```bash
+npm start          # http://localhost:8080
+```
+
+Or just double-click `index.html` — it still works straight off disk.
+
+## Card art on hover
+
+Hovering a card name on the archive page shows the card image, positioned to stay on screen and following the cursor. It's keyboard-accessible too — tab to a row and the preview appears on focus. The **Art on hover** switch turns it off, and the setting is remembered.
+
+Clicking a card name opens the detail sheet, which shows the full-size art beside its stats, banlist status and card text. If the image can't load the sheet collapses back to a single column rather than leaving a gap.
+
+Images come from YGOPRODeck's CDN, so both need a connection; without one the hover preview stays hidden and the detail sheet simply drops the art.
+
+## Publishing a list
+
+The Publish page takes a `.conf` or JSON file, then runs it through a set of checks: does it parse, is the effective date real, does a list already exist for that date, are there duplicate passcodes, does every passcode resolve to a real card. It shows a preview grouped by status before anything is saved.
+
+**Publish to this browser** saves it in `localStorage`, where it sits alongside the bundled archive and shows up in the format and date pickers immediately, tagged `local`. Nothing leaves your machine.
+
+**Download `data/banlists.js`** exports the whole archive — bundled plus local — as a drop-in replacement for the data file. Commit that to ship the list to everyone.
+
+## Deck rules by format
+
+| | Side Deck | Traditional | Main | Extra | Side |
+|---|---|---|---|---|---|
+| TCG | yes | yes | 40–60 | ≤15 | ≤15 |
+| OCG | yes | no | 40–60 | ≤15 | ≤15 |
+| Master Duel | no | no | 40–60 | ≤15 | — |
+
+Copy limits count Main, Extra and Side **together**, per the official rules — three copies split across two piles is still three copies. Traditional format converts Forbidden to Limited rather than removing the card.
+
+The validator also flags cards sitting in the wrong pile (a Link monster in the Main Deck, a Ritual monster in the Extra Deck).
+
+## Design notes
+
+The palette is taken from the game itself: Duel Monsters card-frame colours do the semantic work, so a Spell reads as Spell-green and an Xyz reads as Xyz-black without a legend. Around that sits limestone, gold and lapis rather than a generic accent.
+
+The card tiles are typographic rather than image-based by default — each one is a miniature card frame built from type, with level pips, ATK/DEF and the frame colour as a spine. It's faster, it works offline, and it stays readable at small sizes. There's a **Card art** toggle for when you want to eyeball the real thing.
+
+The signature element is the scale in the verdict bar: it sits level when the deck is legal and tips when it isn't. It respects `prefers-reduced-motion`.
+
+Light and dark are toggled by the sun/moon switch in the header. The choice is written to `localStorage` and read back by an inline script that runs before first paint, so the theme carries across all three pages with no flash on navigation. A `storage` listener also syncs it live between open tabs — flip it on one and the others follow. With nothing stored yet it follows your system setting.
+
+Accessibility floor: visible keyboard focus, `aria-current` on nav and list selection, `aria-pressed` on the toggles, live regions on the status area, and a layout that holds up down to mobile widths.
+
+## File map
+
+```
+index.html            validator
+lists.html            archive browser
+publish.html          upload / verify / publish
+404.html              not-found page
+CNAME                 scale.reizu.dev
+.nojekyll             serve files as-is, no Jekyll
+favicon.ico           multi-resolution, 16 to 256px
+site.webmanifest      installable-app metadata
+robots.txt sitemap.xml
+.github/workflows/deploy.yml
+tests/                56 tests, run with npm test
+assets/styles.css     design tokens, both themes, all layout
+assets/icon.svg       app icon
+js/core.js            parsers, card database, validation engine, shared UI
+js/validator.js       validator page
+js/browse.js          archive page
+js/publish.js         publish page
+data/banlists.js      the archive (generated, ~1.8 MB / ~250 KB gzipped)
+data/banlists.json    the same data, pretty-printed, for other tools
+data/idmap.js         optional foreign-id -> passcode table (generated with --idmap)
+data/cards.js         optional offline card details (generated with --cards)
+assets/icons/         PNG set, maskable variants, social card
+tools/fetch-banlists.mjs
+tools/check-links.mjs
+```
+
+## Credits
+
+Banlist data from [ygo.anihelp.co.uk](https://ygo.anihelp.co.uk/). Card data from [YGOPRODeck](https://ygoprodeck.com/). Yu-Gi-Oh! is a trademark of Konami; this is an unaffiliated fan tool.

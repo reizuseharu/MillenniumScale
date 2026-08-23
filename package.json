@@ -1,0 +1,16 @@
+{
+  "name": "millennium-scale",
+  "version": "1.0.0",
+  "description": "Yu-Gi-Oh! banlist validator — weigh your deck against the list",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/run.mjs",
+    "fetch": "node tools/fetch-banlists.mjs",
+    "fetch:idmap": "node tools/fetch-banlists.mjs --idmap",
+    "fetch:offline": "node tools/fetch-banlists.mjs --cards",
+    "check": "node tools/check-links.mjs .",
+    "start": "python3 -m http.server 8080"
+  },
+  "engines": { "node": ">=18" }
+}
